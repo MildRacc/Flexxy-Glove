@@ -261,5 +261,5 @@ void readGesture()
 
 int linearize(int x)
 {
-  return (int)powf(1.0f / ((float)x + 1.0f), 1.3f);
+ return 4095.0f * ( powf(1.0f / (x + 1.0f), 1.29f) - powf(1.0f / (4096.0f), 1.29f) ) / (1.0f - powf(1.0f / (4096.0f), 1.29f));
 }
