@@ -2,7 +2,7 @@
 #ifndef SERVER_H
 #define SERVER_H
 
-#include </home/sashad/Arduino/HandController/DataVis/libs/httplib.h>
+#include "../libs/httplib.h"
 #include <string>
 #include <websocketpp/config/asio_no_tls.hpp>
 #include <websocketpp/server.hpp>

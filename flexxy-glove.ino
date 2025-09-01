@@ -1,4 +1,5 @@
 #include "BluetoothSerial.h"
+#include "math.h"
 
 #define LED_BUILTIN 2
 
@@ -122,7 +123,7 @@ void fullCalibrate()
 int readFinger(int index)
 {
   digitalWrite(powerPins[index], HIGH);
-  int val = analogRead(fingerPins[index]);
+  int val = linearize(analogRead(fingerPins[index]));
   digitalWrite(powerPins[index], LOW);
   return val;
 
@@ -256,4 +257,9 @@ void readGesture()
   {
     gesture = "None";
   }
+}
+
+int linearize(int x)
+{
+  return (int)powf(1.0f / ((float)x + 1.0f), 1.3f);
 }
