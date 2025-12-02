@@ -1,12 +1,32 @@
+use std::sync::Mutex;
+
 use esp_idf_svc::hal::{gpio::*, prelude::Peripherals};
+use once_cell::sync::Lazy;
 
 const FINGER_MIN: i16 = 0;
 const FINGER_MAX: i16 = 4095;
 
-const FINGER_POWER_PINS: [i8; 5] = [0, 1, 2, 3, 4];
-const FINGER_SIGNAL_PINS: [i8; 5] = [5, 6, 7, 8, 9];
+static mut FINGER_VALUES: [i16; 5] = [0, 0, 0, 0, 0];
 
-static mut finger_values: [i16; 5] = [0, 0, 0, 0, 0];
+const FINGER_POWER_PINS: Mutex<Lazy<[PinDriver<'_, AnyOutputPin, Output>; 5]>> = Mutex::new(once_cell::sync::Lazy::new(|| {
+    [
+        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
+        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
+        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
+        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
+        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
+    ]
+}));
+
+static FINGER_SIGNAL_PINS: Mutex<Lazy<[PinDriver<'_, AnyInputPin, Input>; 5]>> = Mutex::new(once_cell::sync::Lazy::new(|| {
+    [
+        PinDriver::input(unsafe {AnyInputPin::new(10)}).unwrap(),
+        PinDriver::input(unsafe {AnyInputPin::new(11)}).unwrap(),
+        PinDriver::input(unsafe {AnyInputPin::new(12)}).unwrap(),
+        PinDriver::input(unsafe {AnyInputPin::new(13)}).unwrap(),
+        PinDriver::input(unsafe {AnyInputPin::new(14)}).unwrap(),
+    ]
+}));
 
 struct FingerIOPair<'a> {
     input: PinDriver<'a, AnyIOPin, Input>,
@@ -15,14 +35,13 @@ struct FingerIOPair<'a> {
 impl<'a> FingerIOPair<'_> {
     fn new(i: PinDriver<'_, AnyIOPin, Input>, o: PinDriver<'_, AnyIOPin, Output>) -> FingerIOPair<'_>
     {
-        FingerIOPair {input: i, output, o};
+        FingerIOPair {input: i, output: o};
     }
 }
 
 
 fn main() {
-    // It is necessary to call this function once. Otherwise some patches to the runtime
-    // implemented by esp-idf-sys might not link properly. See https://github.com/esp-rs/esp-idf-template/issues/71
+    
     esp_idf_svc::sys::link_patches();
     
 
@@ -32,40 +51,32 @@ fn main() {
     log::info!("Hello, world!");
 
     let peripherals = Peripherals::take().unwrap();
-    let thumb = 
-
-    let mut thumb_read = PinDriver::input(peripherals.pins.gpio0).unwrap();
-    let mut index_read = PinDriver::input(peripherals.pins.gpio1).unwrap();
-    let mut middle_read = PinDriver::input(peripherals.pins.gpio2).unwrap();
-    let mut ring_read = PinDriver::input(peripherals.pins.gpio3).unwrap();
-    let mut pinky_read = PinDriver::input(peripherals.pins.gpio4).unwrap();
-
     
+    loop {
+        
+        cycleFingers();
+
+
+    }
+
 }
 
 
-fn cycleFingers(thumb: PinDriver<'_, AnyIOPin, Input>, index: PinDriver<'_, AnyIOPin, Input>, middle: PinDriver<'_, AnyIOPin, Input>, ring: PinDriver<'_, AnyIOPin, Input>, pinky: PinDriver<'_, AnyIOPin, Input>)
+fn cycleFingers()
 {
-    let mut pins: [Option<PinDriver<'_, AnyIOPin, Input>>; 5] =
-    [
-        Some(thumb),
-        Some(index),
-        Some(middle),
-        Some(ring),
-        Some(pinky)
-    ];
+    
     
     for findex in 0..5
     {
         // Borrow input pin from the array
-        let current_input_pin = pins[findex].take().expect("Pin shouldn't be none");
+        let current_power = FINGER_POWER_PINS.lock().unwrap();
+        let current_input = FINGER_SIGNAL_PINS.lock().unwrap();
+        
+        
+        current_power.
+        
 
-
-        // Convert to output
-        let current_output_pin = current_input_pin.into_output().unwrap();
-
-        let next_input_pin = current_output_pin.into_input().unwrap();
-
-        pins[findex] = Some(next_input_pin);
+        drop(current_power);
+        drop(current_input);
     }
 }
