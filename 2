@@ -28,29 +28,16 @@ static FINGER_SIGNAL_PINS: Mutex<Lazy<[PinDriver<'_, AnyInputPin, Input>; 5]>> =
     ]
 }));
 
-
-struct System
-{
-
-    periph: Peripherals,
-    power_pins: Option<[PinDriver<'static, AnyOutputPin, Output>; 5]>,
-    signal_pins: Option<[PinDriver<'static, AnyInputPin, Input>; 5]>,
-    
-} // struct System
-
-impl System
-{
-
-    fn new(p: Peripherals) -> Self
+struct FingerIOPair<'a> {
+    input: PinDriver<'a, AnyIOPin, Input>,
+    output: PinDriver<'a, AnyIOPin, Output>
+}
+impl<'a> FingerIOPair<'_> {
+    fn new(i: PinDriver<'_, AnyIOPin, Input>, o: PinDriver<'_, AnyIOPin, Output>) -> FingerIOPair<'_>
     {
-        Self {
-            periph: p,
-            power_pins: None,
-            signal_pins: None
-        } // Self
-    } // fn new
-
-} // impl System
+        FingerIOPair {input: i, output: o};
+    }
+}
 
 
 fn main() {
@@ -61,33 +48,22 @@ fn main() {
     // Bind the log crate to the ESP Logging facilities
     esp_idf_svc::log::EspLogger::initialize_default();
 
-    log::info!("Is this running?");
+    log::info!("Hello, world!");
 
     let peripherals = Peripherals::take().unwrap();
-
     
-
-    let power_pins: [PinDriver<'_, AnyOutputPin, Output>; 5] = [ 
-        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
-        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
-        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
-        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
-        PinDriver::output(unsafe {AnyOutputPin::new(0)}).unwrap(),
-    ];
-
-    let signal_pins: [PinDriver<'_, AnyInputPin, Input>; 5] = [
-        PinDriver::input(unsafe {AnyInputPin::new(10)}).unwrap(),
-        PinDriver::input(unsafe {AnyInputPin::new(11)}).unwrap(),
-        PinDriver::input(unsafe {AnyInputPin::new(12)}).unwrap(),
-        PinDriver::input(unsafe {AnyInputPin::new(13)}).unwrap(),
-        PinDriver::input(unsafe {AnyInputPin::new(14)}).unwrap(),
-    ];
-
     loop {
         
+        cycleFingers();
 
 
     }
 
 }
 
+
+fn cycleFingers()
+{
+    
+    
+}
